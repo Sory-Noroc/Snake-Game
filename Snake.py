@@ -1,26 +1,30 @@
-import pygame
+# SNAKE Game by Sory
+
 import sys
-import tkinter
+import pygame  # version 1.9.6
+import tkinter  # version 8.6
 from time import sleep
 from random import randrange
 from os import environ
 
-
 class StarterGui:
     def __init__(self):
         self.mw = tkinter.Tk()  # The main window
-        self.mw.title('Snake')
-        self.mw.configure(bg='yellow')
+        self.mw.title('Snake')  # It's title
+        self.mw.configure(bg='yellow')  # The background
+
+        # Main window positioning
         self.x = self.mw.winfo_screenwidth() // 4
         self.y = self.mw.winfo_screenheight() // 4
         self.mw_width = self.mw.winfo_screenwidth() // 2
         self.mw_height = self.mw.winfo_screenheight() // 2
-        self.mw.geometry(f'{self.mw_width}x{self.mw_height}+{self.x}+{self.y}')  # Main window positioning
+        self.mw.geometry(f'{self.mw_width}x{self.mw_height}+{self.x}+{self.y}')
 
     def lobby(self):
         for child in self.mw.winfo_children():  # The clearing mechanism before the lobby initialization
             child.destroy()  # Clears all the widgets
-        title = tkinter.StringVar(self.mw)
+
+        title = tkinter.StringVar(self.mw)  # The name of the game
         title.set('Snake')
         title_label = tkinter.Label(self.mw, justify='center', textvariable=title, fg='darkblue', bg='yellow',
                                     anchor='center', font='Arial 60', padx=0, pady=0)  # The name of the game
@@ -31,7 +35,8 @@ class StarterGui:
         exit_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', text='Exit',
                                      justify='center', width=30, command=sys.exit)
 
-        title_label.place(x=220, y=50)  # Placing all the widgets
+        # Placing all the widgets of the lobby
+        title_label.place(x=220, y=50)
         play_button.place(x=220, y=160)
         exit_button.place(x=220, y=240)
         settings_button.place(x=220, y=200)
@@ -56,6 +61,7 @@ class StarterGui:
         exit_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', width=6,
                                      text='Exit', command=sys.exit)
 
+        # PLacing the widgets of the Setting tab
         difficulty_label.place(x=240, y=100)
         easy_button.place(x=180, y=140)
         medium_button.place(x=320, y=140)
@@ -64,7 +70,7 @@ class StarterGui:
         exit_button.place(x=360, y=300)
 
     @staticmethod
-    def easy():
+    def easy():  # Difficulty
         game.difficulty = 10
 
     @staticmethod
@@ -105,7 +111,8 @@ class Game:
         pygame.display.set_caption('Snake')
         environ['SDL_VIDEO_WINDOW_POS'] = f"{self.x},{self.y}"
         self.game_window = pygame.display.set_mode((self.width, self.height))
-        while True:
+
+        while True:  # The main game loop, not infinite, it stops when you lose
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -131,8 +138,12 @@ class Game:
             snake.draw()
             food.draw()
             snake.check_pos()  # Getting out of bounds
-            self.show_score(1, (255, 255, 255), 'consolas', 20)
-            pygame.display.update()
+
+            try:  # The error appears when the game ends and will be ignored
+                self.show_score(1, (255, 255, 255), 'consolas', 20)
+                pygame.display.update()
+            except pygame.error:  # This is raised by pygame not recognizing fonts
+                sys.exit()
             game.fps_controller.tick(game.difficulty)  # Refresh rate
 
     def over(self):  # Game Over
@@ -148,7 +159,7 @@ class Game:
         wait_rect = wait_label.get_rect()
         wait_rect.midtop = (self.width / 2, self.height / 1.1)
         self.game_window.blit(wait_label, wait_rect)
-        pygame.display.flip()
+        pygame.display.flip()  # Clearing the screen for a new game
         sleep(1)
         pygame.quit()
         snake.__init__()  # For the next game
@@ -158,26 +169,26 @@ class Game:
 
 
 class Snake:
-    def __init__(self):
+    def __init__(self):  # The initial stats
         self.pos = [100, 50]
         self.body = [[100, 50], [100-10, 50], [100-(2*10), 50]]
         self.direction = 'RIGHT'
         self.change_to = self.direction
 
-    def draw(self):
+    def draw(self): # Draws the Snake back
         game.game_window.fill((0, 0, 0))
         for pos in self.body:
             pygame.draw.rect(game.game_window, (0, 255, 0), pygame.Rect(pos[0], pos[1], 10, 10))
 
-    def grow(self):
+    def grow(self):  # Adds to body length
         self.body.insert(0, list(self.pos))
-        if self.pos[0] == food.pos[0] and self.pos[1] == food.pos[1]:
+        if self.pos[0] == food.pos[0] and self.pos[1] == food.pos[1]:  # If the snake touches food
             game.score += 1
             food.spawn = False
         else:
             self.body.pop()
 
-    def check_pos(self):
+    def check_pos(self):  # In case it hits itself or the window
         if self.pos[0] < 0 or self.pos[0] > game.width - 10:
             game.over()
         if self.pos[1] < 0 or self.pos[1] > game.height - 10:
@@ -208,7 +219,7 @@ class Snake:
 
 
 class Food:
-    def __init__(self):
+    def __init__(self):  # Spawns food randomly on the map 
         self.pos = [randrange(1, (game.width // 10)) * 10, randrange(1, (game.height // 10))
                     * 10]
         self.spawn = True
@@ -219,7 +230,7 @@ class Food:
     def spawn_food(self):
         if not self.spawn:
             self.pos = [randrange(1, (game.width // 10)) * 10, randrange(1, (game.height // 10)) * 10]
-        self.spawn = True
+            self.spawn = True
 
 
 if __name__ == '__main__':
