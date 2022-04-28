@@ -15,15 +15,19 @@ class Game:
 
     def __init__(self):
         self.gui = StarterGui(self)
+        pygame.init()
+        self.food = Food(self)
+        self.snake = Snake(self)
+        self.setUp()
+        self.gui.lobby()
+
+    def setUp(self):
         self.x = self.gui.x
         self.y = self.gui.y
         pygame.init()
         self.fps_controller = pygame.time.Clock()
         self.score = 0
-        self.food = Food(self)
-        self.snake = Snake(self)
         self.game_window = None
-        self.gui.lobby()
 
     def show_score(self, choice, color, font, size):
         score_font = pygame.font.SysFont(font, size)
@@ -33,10 +37,11 @@ class Game:
             score_rect.midtop = (self.width / 10, 15)
         else:
             score_rect.midtop = (self.width / 2, self.height / 1.25)
-        game.game_window.blit(score_surface, score_rect)
+        self.game_window.blit(score_surface, score_rect)
 
     def game_loop(self):  # The main game loop that runs continuously
         self.gui.mw.destroy()
+        self.setUp()
         pygame.display.set_caption('Snake')
         environ['SDL_VIDEO_WINDOW_POS'] = f"{self.x},{self.y}"
         self.game_window = pygame.display.set_mode((self.width, self.height))
@@ -62,7 +67,7 @@ class Game:
                         pygame.event.post(pygame.event.Event(pygame.QUIT, {}))
 
             self.snake.move()
-            self.snake.grow()  # Snake body growing mechanism
+            self.snake.grow(self.food)  # Snake body growing mechanism
             self.food.spawn_food()
             self.snake.draw()
             self.food.draw()
@@ -73,7 +78,7 @@ class Game:
                 pygame.display.update()
             except pygame.error:  # This is raised by pygame not recognizing fonts
                 sys.exit()
-            game.fps_controller.tick(game.difficulty)  # Refresh rate
+            self.fps_controller.tick(self.difficulty)  # Refresh rate
 
     def over(self):  # Game Over
         my_font = pygame.font.SysFont('times new roman', 90)
@@ -98,4 +103,4 @@ class Game:
 
 
 if __name__ == '__main__':
-     Game()
+    Game()
