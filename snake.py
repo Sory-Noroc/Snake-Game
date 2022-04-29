@@ -1,13 +1,22 @@
+from enum import Enum
 
 import pygame  # version 1.9.6
 
 
+class Direction(Enum):
+    RIGHT = 1
+    LEFT = 2
+    UP = 3
+    DOWN = 4
+
+
 class Snake:
+
     def __init__(self, game):  # The initial stats
         self.game = game
         self.pos = [100, 50]
         self.body = [[100, 50], [100-10, 50], [100-(2*10), 50]]
-        self.direction = 'RIGHT'
+        self.direction = Direction.RIGHT
         self.change_to = self.direction
 
     def draw(self):  # Draws the Snake back
@@ -34,20 +43,20 @@ class Snake:
 
     def move(self):
         # Making sure the snake cannot move in the opposite direction instantaneously
-        if self.change_to == 'UP' and self.direction != 'DOWN':
-            self.direction = 'UP'
-        if self.change_to == 'DOWN' and self.direction != 'UP':
-            self.direction = 'DOWN'
-        if self.change_to == 'LEFT' and self.direction != 'RIGHT':
-            self.direction = 'LEFT'
-        if self.change_to == 'RIGHT' and self.direction != 'LEFT':
-            self.direction = 'RIGHT'
+        if self.change_to == Direction.UP and self.direction != Direction.DOWN:
+            self.direction = Direction.UP
+        if self.change_to == Direction.DOWN and self.direction != Direction.UP:
+            self.direction = Direction.DOWN
+        if self.change_to == Direction.LEFT and self.direction != Direction.RIGHT:
+            self.direction = Direction.LEFT
+        if self.change_to == Direction.RIGHT and self.direction != Direction.LEFT:
+            self.direction = Direction.RIGHT
         # Moving the snake
-        if self.direction == 'UP':
+        if self.direction == Direction.UP:
             self.pos[1] -= 10
-        if self.direction == 'DOWN':
+        if self.direction == Direction.DOWN:
             self.pos[1] += 10
-        if self.direction == 'LEFT':
+        if self.direction == Direction.LEFT:
             self.pos[0] -= 10
-        if self.direction == 'RIGHT':
+        if self.direction == Direction.RIGHT:
             self.pos[0] += 10

@@ -1,5 +1,63 @@
-
+from snake import Direction
+from enum import Enum
 from main import *
+
+
+class Action(Enum):
+    LEFT = 0
+    STRAIGHT = 1
+    RIGHT = 2
+
+
+class SnakeAI(Snake):
+    def __init__(self, context):
+        super().__init__(context)
+
+    def move_by_action(self, action):
+        """
+        :param action: [Straight, Right or Left]
+        :return: None
+        """
+        rotation = [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
+        index = rotation.index(self.direction)
+
+        if action == Action.LEFT:
+            # if we go up, change to last index, else go to left direction
+            new_index = index - 1 if index > 0 else 3
+            self.direction = rotation[new_index]
+        elif action == Action.RIGHT:
+            self.direction = rotation[(index+1) % 4]
+        # If we go straight no need to change anything
+
+        super().move()
+
+    def check_pos(self, point=None, check_body=True):  # In case it hits itself or the window
+        if point is None:
+            point = self.pos
+
+        if point[0] < 0 or point[0] > self.game.width - 10:
+            # self.game.over()
+            return True
+        if point[1] < 0 or point[1] > self.game.height - 10:
+            # self.game.over()
+            return True
+        if check_body:
+            for block in self.body[1:]:  # Touching the snake body
+                if self.pos[0] == block[0] and self.pos[1] == block[1]:
+                    # self.game.over()
+                    return True
+        return False
+
+    def grow(self, food):  # Adds to body length
+        self.body.insert(0, list(self.pos))
+        if self.pos[0] == food.pos[0] and self.pos[1] == food.pos[1]:  # If the snake touches food
+            self.game.score += 1
+            food.spawn = False
+            reward = 10
+            return reward
+        else:
+            self.body.pop()
+            return 0
 
 
 class GameAI(Game):
@@ -9,12 +67,14 @@ class GameAI(Game):
 
     def __init__(self):
         super().__init__()
+        self.reset()
         self.game_screen()
 
     def reset(self):
-        self.snake = Snake(self)
+        self.snake = SnakeAI(self)
         self.score = 0
         self.food = Food(self)
+        self.frame_count = 0
 
     def game_screen(self):
         self.gui.mw.destroy()
@@ -23,39 +83,32 @@ class GameAI(Game):
         environ['SDL_VIDEO_WINDOW_POS'] = f"{self.x},{self.y}"
         self.game_window = pygame.display.set_mode((self.width, self.height))
 
-    def game_loop(self):  # The main game loop that runs continuously
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                # Whenever a key is pressed down
-                elif event.type == pygame.KEYDOWN:
-                    # W -> Up; S -> Down; A -> Left; D -> Right
-                    if event.key == pygame.K_UP or event.key == ord('w'):
-                        self.snake.change_to = 'UP'
-                    if event.key == pygame.K_DOWN or event.key == ord('s'):
-                        self.snake.change_to = 'DOWN'
-                    if event.key == pygame.K_LEFT or event.key == ord('a'):
-                        self.snake.change_to = 'LEFT'
-                    if event.key == pygame.K_RIGHT or event.key == ord('d'):
-                        self.snake.change_to = 'RIGHT'
-                    # Esc -> Create event to quit the game
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.event.post(pygame.event.Event(pygame.QUIT, {}))
+    def game_loop(self, action=None):  # The main game loop that runs continuously
+        self.frame_count += 1
 
-            self.snake.move()
-            self.snake.grow(self.food)  # Snake body growing mechanism
-            self.food.spawn_food()
-            self.snake.draw()
-            self.food.draw()
-            self.snake.check_pos()  # Getting out of bounds
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
 
-            try:  # The error appears when the game ends and will be ignored
-                self.show_score(1, (255, 255, 255), 'consolas', 20)
-                pygame.display.update()
-            except pygame.error:  # This is raised by pygame not recognizing fonts
-                sys.exit()
-            self.fps_controller.tick(self.difficulty)  # Refresh rate
+        self.snake.move()
+
+        reward = self.snake.grow(self.food)  # If snake eats, gets 10 reward, else 0
+        game_over = self.snake.check_pos() or self.frame_count > 100 * len(self.snake.body)
+
+        if game_over:
+            reward = -10
+            return reward, self.score
+        self.food.spawn_food()
+        self.snake.draw()
+        self.food.draw()
+
+        try:  # The error appears when the game ends and will be ignored
+            self.show_score(1, (255, 255, 255), 'consolas', 20)
+            pygame.display.flip()
+        except pygame.error:  # This is raised by pygame not recognizing fonts
+            sys.exit()
+        self.fps_controller.tick(self.difficulty)  # Refresh rate
 
     def over(self):  # Game Over
         """
@@ -81,5 +134,6 @@ class GameAI(Game):
 
 if __name__ == '__main__':
     game = GameAI()
+    game.game_screen()
     while True:  # The main game loop, not infinite, it stops when you lose
-        game.game_loop()
+        reward, score = game.game_loop()
