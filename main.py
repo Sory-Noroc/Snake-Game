@@ -15,11 +15,10 @@ class Game:
 
     def __init__(self):
         self.gui = StarterGui(self)
-        pygame.init()
         self.food = Food(self)
         self.snake = Snake(self)
-        self.setUp()
-        self.gui.lobby()
+        # self.setUp()
+        # self.gui.launch()
 
     def setUp(self):
         self.x = self.gui.x
@@ -80,7 +79,11 @@ class Game:
                 sys.exit()
             self.fps_controller.tick(self.difficulty)  # Refresh rate
 
-    def over(self):  # Game Over
+    def over(self):
+        """
+        Gets called when the snake runs into itself or the border
+        :return: None
+        """
         my_font = pygame.font.SysFont('times new roman', 90)
         game_over_label = my_font.render('YOU DIED', True, (255, 0, 0))
         game_over_rect = game_over_label.get_rect()
@@ -99,8 +102,9 @@ class Game:
         self.snake = Snake(self)  # For the next game
         self.food = Food(self)
         self.gui.__init__(self)
-        self.gui.lobby()
+        self.gui.launch()
 
 
 if __name__ == '__main__':
-    Game()
+    game = Game()
+    game.gui.launch()

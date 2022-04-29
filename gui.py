@@ -17,7 +17,7 @@ class StarterGui:
         self.mw_height = self.mw.winfo_screenheight() // 2
         self.mw.geometry(f'{self.mw_width}x{self.mw_height}+{self.x}+{self.y}')
 
-    def lobby(self):
+    def launch(self):
         for child in self.mw.winfo_children():  # The clearing mechanism before the lobby initialization
             child.destroy()  # Clears all the widgets
 
@@ -28,7 +28,7 @@ class StarterGui:
         settings_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', width=30,
                                          text='Settings', command=self.settings)
         play_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', text='Play',
-                                     justify='center', width=30, command=self.context.game_loop)
+                                     justify='center', width=30, command=self.play)
         exit_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', text='Exit',
                                      justify='center', width=30, command=sys.exit)
 
@@ -38,6 +38,10 @@ class StarterGui:
         exit_button.place(x=220, y=240)
         settings_button.place(x=220, y=200)
         self.mw.mainloop()  # GUI mainloop
+
+    def play(self):
+        self.context.game_loop()
+        self.context.restart()
 
     def settings(self):
         for child in self.mw.winfo_children():  # Clears the interface
@@ -54,7 +58,7 @@ class StarterGui:
         expert_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', width=6,
                                        text='Expert', command=self.expert)
         return_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', width=6,
-                                       text='Return', command=self.lobby)
+                                       text='Return', command=self.launch)
         exit_button = tkinter.Button(self.mw, activebackground='lightblue', bg='lightgray', fg='blue', width=6,
                                      text='Exit', command=sys.exit)
 
