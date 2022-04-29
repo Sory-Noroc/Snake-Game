@@ -6,7 +6,9 @@ import pygame
 class Food:
     def __init__(self, game):  # Spawns food randomly on the map
         self.game = game
-        self.pos = [randrange(1, (game.width // 10)) * 10, randrange(1, (game.height // 10)) * 10]
+        self.x = randrange(1, (game.width // 10)) * 10
+        self.y = randrange(1, (game.height // 10)) * 10
+        self.pos = [self.x, self.y]
         self.spawn = True
 
     def draw(self):
