@@ -7,6 +7,8 @@ from gui import StarterGui
 from food import Food
 from snake import Snake
 
+pygame.init()
+
 
 class Game:
     width = 720
@@ -23,7 +25,6 @@ class Game:
     def setUp(self):
         self.x = self.gui.x
         self.y = self.gui.y
-        pygame.init()
         self.fps_controller = pygame.time.Clock()
         self.score = 0
         self.game_window = None

@@ -1,5 +1,5 @@
-from enum import Enum
 
+from enum import Enum
 import pygame  # version 1.9.6
 
 
@@ -15,7 +15,7 @@ class Snake:
     def __init__(self, game):  # The initial stats
         self.game = game
         self.pos = [100, 50]
-        self.body = [[100, 50], [100-10, 50], [100-(2*10), 50]]
+        self.body = [self.pos, [100-10, 50], [100-(2*10), 50]]
         self.direction = Direction.RIGHT
         self.change_to = self.direction
 
